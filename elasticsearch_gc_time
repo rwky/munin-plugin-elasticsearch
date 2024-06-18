@@ -48,52 +48,61 @@ my $ua = LWP::UserAgent->new;
 $ua->timeout(10);
 
 sub autoconf {
-    my $res = $ua->get($url, 'Content-Type' => 'application/json' );
-    my $data = do { local $@; eval { decode_json($res->content) } };
-    if ($data->{version}->{number}) {
-	    print("yes\n");
-    } else {
-	    print("no\n");
+    my $res  = $ua->get( $url, 'Content-Type' => 'application/json' );
+    my $data = do {
+        local $@;
+        eval { decode_json( $res->content ) }
+    };
+    if ( $data->{version}->{number} ) {
+        print("yes\n");
+    }
+    else {
+        print("no\n");
     }
     exit(0);
 }
 
-if ($ARGV[0] and $ARGV[0] eq 'autoconf') {
-	autoconf();
+if ( $ARGV[0] and $ARGV[0] eq 'autoconf' ) {
+    autoconf();
 }
 
 sub get_json_from_url {
     my $uri = shift;
-    my $res = $ua->get($url . $uri, 'Content-Type' => 'application/json' );
-    Carp::confess($res->code . " for " . $uri) unless $res->is_success;
-    my $data = do { local $@; eval { decode_json($res->content) } };
-    die("Could not decode JSON from: " . $res->content) unless $data;
+    my $res = $ua->get( $url . $uri, 'Content-Type' => 'application/json' );
+    Carp::confess( $res->code . " for " . $uri ) unless $res->is_success;
+    my $data = do {
+        local $@;
+        eval { decode_json( $res->content ) }
+    };
+    die( "Could not decode JSON from: " . $res->content ) unless $data;
     return $data;
 }
 
 my $data = get_json_from_url("/_nodes/_local/stats/jvm");
-my %out = (young => 0, old => 0);
+my %out  = ( young => 0, old => 0 );
 
-foreach my $full_node_name (keys %{$data->{nodes}}) {
+foreach my $full_node_name ( keys %{ $data->{nodes} } ) {
     next unless $data->{nodes}{$full_node_name};
-    if (defined($data->{nodes}{$full_node_name}{jvm}{gc}{collectors}{young})) {
-        $out{young} += $data->{nodes}{$full_node_name}{jvm}{gc}{collectors}{young}{collection_time_in_millis};
+    if ( defined( $data->{nodes}{$full_node_name}{jvm}{gc}{collectors}{young} ) ) {
+        $out{young}
+          += $data->{nodes}{$full_node_name}{jvm}{gc}{collectors}{young}{collection_time_in_millis};
     }
-    if (defined($data->{nodes}{$full_node_name}{jvm}{gc}{collectors}{old})) {
-        $out{old} += $data->{nodes}{$full_node_name}{jvm}{gc}{collectors}{old}{collection_time_in_millis};
+    if ( defined( $data->{nodes}{$full_node_name}{jvm}{gc}{collectors}{old} ) ) {
+        $out{old}
+          += $data->{nodes}{$full_node_name}{jvm}{gc}{collectors}{old}{collection_time_in_millis};
     }
 }
-if ($ARGV[0] and $ARGV[0] eq 'config') {
+if ( $ARGV[0] and $ARGV[0] eq 'config' ) {
     print "graph_title Elasticsearch gc time\n";
     print "graph_category elasticsearch\n";
     print "graph_vlabel miliseconds\n";
 
-    foreach my $name (keys %out) {
-        print "$name.label $name\n"."$name.type COUNTER\n";
+    foreach my $name ( keys %out ) {
+        print "$name.label $name\n" . "$name.type COUNTER\n";
     }
 }
 else {
-    foreach my $name (keys %out) {
+    foreach my $name ( keys %out ) {
         print "$name.value " . $out{$name} . "\n";
     }
 }

@@ -47,43 +47,50 @@ my $ua = LWP::UserAgent->new;
 $ua->timeout(10);
 
 sub autoconf {
-    my $res = $ua->get($url, 'Content-Type' => 'application/json' );
-    my $data = do { local $@; eval { decode_json($res->content) } };
-    if ($data->{version}->{number}) {
-	    print("yes\n");
-    } else {
-	    print("no\n");
+    my $res  = $ua->get( $url, 'Content-Type' => 'application/json' );
+    my $data = do {
+        local $@;
+        eval { decode_json( $res->content ) }
+    };
+    if ( $data->{version}->{number} ) {
+        print("yes\n");
+    }
+    else {
+        print("no\n");
     }
     exit(0);
 }
 
-if ($ARGV[0] and $ARGV[0] eq 'autoconf') {
-	autoconf();
+if ( $ARGV[0] and $ARGV[0] eq 'autoconf' ) {
+    autoconf();
 }
 
 sub get_json_from_url {
     my $uri = shift;
-    my $res = $ua->get($url . $uri, 'Content-Type' => 'application/json' );
-    Carp::confess($res->code . " for " . $uri) unless $res->is_success;
-    my $data = do { local $@; eval { decode_json($res->content) } };
-    die("Could not decode JSON from: " . $res->content) unless $data;
+    my $res = $ua->get( $url . $uri, 'Content-Type' => 'application/json' );
+    Carp::confess( $res->code . " for " . $uri ) unless $res->is_success;
+    my $data = do {
+        local $@;
+        eval { decode_json( $res->content ) }
+    };
+    die( "Could not decode JSON from: " . $res->content ) unless $data;
     return $data;
 }
 
-my $data = get_json_from_url("/_nodes");
+my $data   = get_json_from_url("/_nodes");
 my $t_data = get_json_from_url("/_nodes/stats");
 my %out;
 
-foreach my $full_node_name (keys %{$data->{nodes}}) {
+foreach my $full_node_name ( keys %{ $data->{nodes} } ) {
     next unless $t_data->{nodes}{$full_node_name};
-    $out{index} += $t_data->{nodes}{$full_node_name}{indices}{indexing}{index_total};
-    $out{get} += $t_data->{nodes}{$full_node_name}{indices}{get}{total};
+    $out{index}   += $t_data->{nodes}{$full_node_name}{indices}{indexing}{index_total};
+    $out{get}     += $t_data->{nodes}{$full_node_name}{indices}{get}{total};
     $out{missing} += $t_data->{nodes}{$full_node_name}{indices}{get}{missing_total};
-    $out{exists} += $t_data->{nodes}{$full_node_name}{indices}{get}{exists_total};
-    $out{search} += $t_data->{nodes}{$full_node_name}{indices}{search}{query_total};
-    $out{delete} += $t_data->{nodes}{$full_node_name}{indices}{indexing}{delete_total};
+    $out{exists}  += $t_data->{nodes}{$full_node_name}{indices}{get}{exists_total};
+    $out{search}  += $t_data->{nodes}{$full_node_name}{indices}{search}{query_total};
+    $out{delete}  += $t_data->{nodes}{$full_node_name}{indices}{indexing}{delete_total};
 }
-if ($ARGV[0] and $ARGV[0] eq 'config') {
+if ( $ARGV[0] and $ARGV[0] eq 'config' ) {
     print "graph_title Elasticsearch index operations\n";
     print "graph_category elasticsearch\n";
     print "graph_args --base 1000 -l 0\n";
@@ -122,7 +129,7 @@ if ($ARGV[0] and $ARGV[0] eq 'config') {
 
 }
 else {
-    foreach my $name (keys %out) {
+    foreach my $name ( keys %out ) {
         print "$name.value " . $out{$name} . "\n";
     }
 }
