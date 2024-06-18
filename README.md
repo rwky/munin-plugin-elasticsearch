@@ -20,6 +20,8 @@ This original codes has out of maintenance, so I have started maintenance this p
 * elasticsearch_jvm_pools_size - JVM pools size stats
 * elasticsearch_jvm_threads - JVM thread stats
 * elasticsearch_open_files - open files count
+* elasticsearch_cluster_health - health check (green/yellow/red)
+* elasticsearch_cluster_nodes - number of nodes
 
 ## Configuration
 
