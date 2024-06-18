@@ -34,25 +34,44 @@ None known so far. If you find any, let me know.
 
 Timothy Messier (t0m) - c<< <tim.messier@gmail.com> >>
 Kentaro Yoshida - https://github.com/y-ken
+Rowan Wookey - https://www.rwky.net
+
+=head1 LICENSE
+
+MIT
 
 =cut
 
-my $host = exists $ENV{'host'} ? $ENV{'host'} : 'localhost';
-my $port = exists $ENV{'port'} ? $ENV{'port'} : 9200;
+my $url = exists $ENV{'url'} ? $ENV{'url'} : 'http://localhost:9200';
 
 my $ua = LWP::UserAgent->new;
 $ua->timeout(10);
 
+sub autoconf {
+    my $res = $ua->get($url, 'Content-Type' => 'application/json' );
+    my $data = do { local $@; eval { decode_json($res->content) } };
+    if ($data->{version}->{number}) {
+	    print("yes\n");
+    } else {
+	    print("no\n");
+    }
+    exit(0);
+}
+
+if ($ARGV[0] and $ARGV[0] eq 'autoconf') {
+	autoconf();
+}
+
 sub get_json_from_url {
     my $uri = shift;
-    my $res = $ua->get($uri, 'Content-Type' => 'application/json' );
+    my $res = $ua->get($url . $uri, 'Content-Type' => 'application/json' );
     Carp::confess($res->code . " for " . $uri) unless $res->is_success;
     my $data = do { local $@; eval { decode_json($res->content) } };
     die("Could not decode JSON from: " . $res->content) unless $data;
     return $data;
 }
 
-my $data = get_json_from_url("http://$host:$port/_nodes/_local/stats/jvm");
+my $data = get_json_from_url("/_nodes/_local/stats/jvm");
 my %out = (young => 0, old => 0);
 
 foreach my $full_node_name (keys %{$data->{nodes}}) {
@@ -73,10 +92,8 @@ if ($ARGV[0] and $ARGV[0] eq 'config') {
         print "$name.label $name\n"."$name.type COUNTER\n";
     }
 }
-elsif (!$ARGV[0] || $ARGV[0] eq 'autoconf') {
+else {
     foreach my $name (keys %out) {
         print "$name.value " . $out{$name} . "\n";
     }
 }
-
-exit(0);
