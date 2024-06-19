@@ -97,36 +97,13 @@ if ( $ARGV[0] and $ARGV[0] eq 'config' ) {
     print "graph_vlabel Operations per second\n";
 
     print "graph_order index get missing exists search delete\n";
-    print "index.label index\n";
-    print "index.type DERIVE\n";
-    print "index.min 0\n";
-    print "index.draw LINE2\n";
 
-    print "get.label get\n";
-    print "get.type DERIVE\n";
-    print "get.min 0\n";
-    print "get.draw LINE2\n";
-
-    print "missing.label missing\n";
-    print "missing.type GAUGE\n";
-    print "missing.min 0\n";
-    print "missing.draw LINE2\n";
-
-    print "exists.label exists\n";
-    print "exists.type GAUGE\n";
-    print "exists.min 0\n";
-    print "exists.draw LINE2\n";
-
-    print "search.label search\n";
-    print "search.type DERIVE\n";
-    print "search.min 0\n";
-    print "search.draw LINE2\n";
-
-    print "delete.label delete\n";
-    print "delete.type DERIVE\n";
-    print "delete.min 0\n";
-    print "delete.draw LINE2\n";
-
+    for my $name ( keys %out ) {
+        print "$name.label $name\n";
+        print "$name.type DERIVE\n";
+        print "$name.min 0\n";
+        print "$name.draw LINE2\n";
+    }
 }
 else {
     foreach my $name ( keys %out ) {

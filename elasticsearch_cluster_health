@@ -82,9 +82,9 @@ if ( $ARGV[0] and $ARGV[0] eq 'config' ) {
     print "graph_title elasticsearch cluster health\n";
     print "graph_category elasticsearch\n";
     print "graph_scale no\n";
-    print "green.label green\n" . "green.type GAUGE\n";
-    print "yellow.label yellow\n" . "yellow.type GAUGE\n";
-    print "red.label red\n" . "red.type GAUGE\n";
+    print "green.label green\n" . "green.type GAUGE\n" . "green.draw AREA\n";
+    print "yellow.label yellow\n" . "yellow.type GAUGE\n" . "yellow.draw AREA\n";
+    print "red.label red\n" . "red.type GAUGE\n" . "red.draw AREA\n";
 }
 else {
     if ( $data->{status} eq "green" ) {
