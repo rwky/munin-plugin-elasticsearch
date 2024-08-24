@@ -85,8 +85,10 @@ my %out    = ( index_size => 0, total_data_set_size => 0, reserved_size => 0 );
 foreach my $full_node_name ( keys %{ $data->{nodes} } ) {
     next unless $t_data->{nodes}{$full_node_name};
     $out{index_size} += $t_data->{nodes}{$full_node_name}{indices}{store}{size_in_bytes};
-    $out{total_data_set_size}
-      += $t_data->{nodes}{$full_node_name}{indices}{store}{total_data_set_size_in_bytes};
+    if ( exists $t_data->{nodes}{$full_node_name}{indices}{store}{total_data_set_size_in_bytes} ) {
+        $out{total_data_set_size}
+          += $t_data->{nodes}{$full_node_name}{indices}{store}{total_data_set_size_in_bytes};
+    }
     $out{reserved_size} += $t_data->{nodes}{$full_node_name}{indices}{store}{reserved_in_bytes};
 }
 if ( $ARGV[0] and $ARGV[0] eq 'config' ) {
